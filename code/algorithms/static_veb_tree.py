@@ -16,8 +16,9 @@ class StaticVEBTree:
         ----------
         data : [list] Sequence of integers to be stored in the vEB node root.
         """
-        self.u = next_power_of_two(data[-1])
-        self.root = StaticVEBNode(data, self.u)
+        self.u = 2 * next_power_of_two(data[-1])
+        bin_map = self.__data_to_bin_map(data)
+        self.root = StaticVEBNode(bin_map, self.u)
 
     def is_member(self, x):
         """Method that provides a wrapper to the StaticVEBNode.is_member() method.
@@ -31,6 +32,15 @@ class StaticVEBTree:
         True if x belongs to the tree and False otherwise.
         """ 
         return self.root.is_member(x)
+
+    def __data_to_bin_map(self, data):
+        bin_map = np.zeros(self.u)
+        ptr_data = 0
+        ptr_bin_map = 0
+        for num in data:
+            bin_map[num] = 1
+
+        return bin_map
 
 if __name__ == "__main__":
     

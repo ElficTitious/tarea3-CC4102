@@ -6,28 +6,42 @@ class StaticVEBNode:
     """Class that represents a node of a static version of the structure vEB tree.
     """
 
-    def __init__(self, data, u):
+    def __init__(self, bin_map, u):
         """Recursively initializes a StaticVEBNode.  
     
         Parameters
         ----------
-        data : [int] Numbers to be stored in the node.
+        bin_map : [numpy.ndarray] Binary map of the information to be
+                  stored in the node.
         u : [int] Universe size for the node.
         """
+        self.bin_map = bin_map
         self.u = u
-        self.cluster = []
-        if len(data) > 0:
-            data = list(dict.fromkeys(data))  # Because this structure is recursive we need
-                                              # to erase duplicates.
-            self.min = data[0]
-            self.max = data[-1]
-            data.pop(0)  # We remove the minimum.
+        if not self.__is_empty():
+            self.__init_max()
+            self.__init_min()
+
         else:  # If there is no data to be stored in the node, both fields are null.
             self.min = None
             self.max = None
-        self.initialize_children(data)  # We need to recursively initialize all the children nodes.
+        self.__initialize_children()  # We need to recursively initialize all the children nodes.
+    
+    def __is_empty(self):
+        for i in range(self.u):
+            if self.bin_map[i] == 1:
+                return False
+        return True
 
-    def high(self, x):
+    def __init_min(self):
+        self.min = np.argmax(self.bin_map)
+        self.bin_map[self.min] = 0
+
+    def __init_max(self):
+        reverse_bin_map = self.bin_map[::-1]
+        self.max = len(reverse_bin_map) - np.argmax(reverse_bin_map) - 1
+
+
+    def __high(self, x):
         """Method for calculating the most significant ceil(log2(u)/2) bits of x.
 
         Parameters
@@ -36,13 +50,13 @@ class StaticVEBNode:
 
         Returns
         -------
-        result : [int] floor(x / lower_sqrt(self.u)), the 
+        result : [int] floor(x / __lower_sqrt(self.u)), the 
                  most significant ceil(log2(u)/2) bits of x.
         """
         result = floor(x / lower_sqrt(self.u))
         return result
     
-    def low(self, x):
+    def __low(self, x):
         """Method for calculating the most least sifnificant floor(log2(u)/2) bits of x.
 
         Parameters
@@ -57,53 +71,39 @@ class StaticVEBNode:
         result = x % lower_sqrt(self.u)
         return result
 
-    def partition_data(self, data):
-        """Method for partitioning the data of the node so that the method initializeChildren()
-        can construct each children with it's own share of the data to be stored.
-    
-        Parameters
-        ---------
-        data : [list] List of ints to be partitioned.
+    def __partition_bin_maps(self):
+        partitioned_bin_maps = np.zeros((upper_sqrt(self.u), lower_sqrt(self.u)))
+        i = 0
+        ptr_bin_maps = 0
+        while i < self.u:
+            while self.__high(i) == ptr_bin_maps:
+                if self.bin_map[i] == 1:
+                    partitioned_bin_maps[ptr_bin_maps][self.__low(i)] = 1
+                i += 1
+            ptr_bin_maps += 1
 
-        Returns
-        -------
-        partition : [list] Partitioned data of size upperSqrt(self.u) to
-                    initialize the children of the current node.
-        """
-        partition = []
-        i = j = 0
-        while i < upper_sqrt(self.u):
-            temp = []
-            while (j < len(data) and self.high(data[j]) == i):
-                temp.append(data[j])
-                j += 1
-            partition.append(temp)
-            i += 1
-        return partition
+        return partitioned_bin_maps 
 
-    def initialize_children(self, data):
+    def __initialize_children(self):
         """Method used in the constructor of this class for initializing the children 
         of the current node.
-
-        Parameters
-        ----------
-        data : [list] Data being stored in the node.
         """ 
         if self.u == 2:  # If the current node is of base size, the cluster is null; that is, it doesn't have any children.
             self.cluster = None
         else:
-            partitioned_data = self.partition_data(data)  # We partition the data to give each children its corresponding share.
+            self.cluster = []
+            partitioned_bin_maps = self.__partition_bin_maps()
             for i in range(upper_sqrt(self.u)):
-                # We apply the map low() to each element and sort the resulting list to keep the invariant.
-                low_temp_data = sorted([self.low(e) for e in partitioned_data[i]])
-                temp_node = StaticVEBNode(low_temp_data, lower_sqrt(self.u))
+                temp_node = StaticVEBNode(partitioned_bin_maps[i], lower_sqrt(self.u))
                 self.cluster.append(temp_node)
+
+        self.cluster = np.array(self.cluster)
 
     
     def is_member(self, x):
         if (self.min is not None and self.max is not None) and (x == self.min or x == self.max):
             return True
         elif self.u == 2 : return False
-        # Else we search the number given by the least significant floor(log2(u)/2) bits of x in the cluster with index high(x).
+        # Else we search the number given by the least significant floor(log2(u)/2) bits of x in the cluster with index __high(x).
         else:  
-            return self.cluster[self.high(x)].is_member(self.low(x))
+            return self.cluster[self.__high(x)].is_member(self.__low(x))
