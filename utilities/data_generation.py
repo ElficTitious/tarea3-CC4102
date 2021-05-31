@@ -49,10 +49,10 @@ def rand_data_extensor(data, len_extension):
     return data
 
 def run_experiment(data, n):
-    """Method for timing both methods over n runs by searching random numbers
-    in data and taking the median over the n runs.
+    """Method used for timing the execution time for both methods in searching random numbers from
+    the array data. The method searches n random numbers in data, where for each number it takes
+    an average over a hundred runs, to finally take the median of the averages.  
     """
-    upper_bound = data[-1]
     veb_tree = StaticVEBTree(data)
     times = np.zeros((2, n))
     timer = Timer()
@@ -62,7 +62,7 @@ def run_experiment(data, n):
     for i in range(n):
         time_for_bs = 0
         time_for_veb = 0
-        # We run the search for data[rand_index] 10 times and take the average
+        # We run the search for data[rand_index] 100 times and take the average
         rand_index = randint(0, len(data) - 1) 
         for j in range(100):
             timer.start()
@@ -71,10 +71,10 @@ def run_experiment(data, n):
             timer.start()
             veb_tree.is_member(data[rand_index])
             time_for_veb += timer.stop()
-        # We divide by 10 to take average and multiply by 1000 to convert to milliseconds. 
+        # We divide by 100 to take average and multiply by 1000 to convert to milliseconds. 
         times[0][i] = 1000 * (time_for_bs/100)  
         times[1][i] = 1000 * (time_for_veb/100)
-
+    
     return [np.median(times[0]), np.median(times[1])]
 
 def time_experiment(file_path_1, file_path_2):
@@ -103,23 +103,23 @@ def time_experiment(file_path_1, file_path_2):
     with open(file_path_2, 'w') as f:
         f.write('\n'.join(times_veb))
 
-def time_data_generation_0(file_path_1, file_path_2):
-    """Method for running experiments from arrays of size 10 to 1000 and writting the 
+def time_data_generation(file_path_1, file_path_2, start, end, increment):
+    """Method for running experiments from arrays of size start to end and writting the 
     resulting times in files file_path_1 for binary search and file_path_2 for
-    StaticVEBTree is_member(). Takes increments of 1.
+    StaticVEBTree is_member(). Takes increments of size increment.
     """
     times_bs = []
     times_veb = []
-    i = 10 
+    i = start
     data = data_generator(i)
 
-    while i <= 1000:
+    while i <= end:
         temp_times = run_experiment(data, 4)
         print("Time for binary search for array of size {} is {:.5f} milliseconds.".format(i, temp_times[0]))
         print("Time for vEB-Tree search for array of size {} is {:.5f} milliseconds.".format(i, temp_times[1]))
         times_bs.append(str(temp_times[0]))
         times_veb.append(str(temp_times[1]))
-        len_extension = 10
+        len_extension = increment
         data = rand_data_extensor(data, len_extension)
         i += len_extension
         
@@ -129,80 +129,3 @@ def time_data_generation_0(file_path_1, file_path_2):
     with open(file_path_2, 'w') as f:
         f.write('\n'.join(times_veb))
 
-def time_data_generation_1(file_path_1, file_path_2):
-    """Method for running experiments from arrays of size 1000 to 10000 and writting the 
-    resulting times in files file_path_1 for binary search and file_path_2 for
-    StaticVEBTree is_member(). Takes increments of 100.
-    """
-    times_bs = []
-    times_veb = []
-    i = 1000 
-    data = data_generator(i)
-
-    while i <= 10000:
-        temp_times = run_experiment(data, 4)
-        print("Time for binary search for array of size {} is {:.5f} milliseconds.".format(i, temp_times[0]))
-        print("Time for vEB-Tree search for array of size {} is {:.5f} milliseconds.".format(i, temp_times[1]))
-        times_bs.append(str(temp_times[0]))
-        times_veb.append(str(temp_times[1]))
-        len_extension = 100
-        data = rand_data_extensor(data, len_extension)
-        i += len_extension
-        
-    with open(file_path_1, 'w') as f:
-        f.write('\n'.join(times_bs))
- 
-    with open(file_path_2, 'w') as f:
-        f.write('\n'.join(times_veb))
-
-def time_data_generation_2(file_path_1, file_path_2):
-    """Method for running experiments from arrays of size 1e4 to 1e5 and writting the 
-    resulting times in files file_path_1 for binary search and file_path_2 for
-    StaticVEBTree is_member(). Takes increments of 1000.
-    """
-    times_bs = []
-    times_veb = []
-    i = int(1e4)
-    data = data_generator(i)
-
-    while i <= int(1e5):
-        temp_times = run_experiment(data, 4)
-        print("Time for binary search for array of size {} is {:.5f} milliseconds.".format(i, temp_times[0]))
-        print("Time for vEB-Tree search for array of size {} is {:.5f} milliseconds.".format(i, temp_times[1]))
-        times_bs.append(str(temp_times[0]))
-        times_veb.append(str(temp_times[1]))
-        len_extension = 1000
-        data = rand_data_extensor(data, len_extension)
-        i += len_extension
-        
-    with open(file_path_1, 'w') as f:
-        f.write('\n'.join(times_bs))
- 
-    with open(file_path_2, 'w') as f:
-        f.write('\n'.join(times_veb))
-
-def time_data_generation_3(file_path_1, file_path_2):
-    """Method for running experiments from arrays of size 1e5 to 1e6 and writting the 
-    resulting times in files file_path_1 for binary search and file_path_2 for
-    StaticVEBTree is_member(). Takes increments of 10000.
-    """
-    times_bs = []
-    times_veb = []
-    i = int(1e5)
-    data = data_generator(i)
-
-    while i <= int(1e6):
-        temp_times = run_experiment(data, 4)
-        print("Time for binary search for array of size {} is {:.5f} milliseconds.".format(i, temp_times[0]))
-        print("Time for vEB-Tree search for array of size {} is {:.5f} milliseconds.".format(i, temp_times[1]))
-        times_bs.append(str(temp_times[0]))
-        times_veb.append(str(temp_times[1]))
-        len_extension = 10000
-        data = rand_data_extensor(data, len_extension)
-        i += len_extension
-        
-    with open(file_path_1, 'w') as f:
-        f.write('\n'.join(times_bs))
- 
-    with open(file_path_2, 'w') as f:
-        f.write('\n'.join(times_veb))

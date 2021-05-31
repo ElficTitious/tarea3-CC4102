@@ -3,6 +3,20 @@ from utilities.data_generation import *
 import random as rand
 
 def binary_search(arr, x):
+    """Method that implements the algorithm binary search.
+    If x is in arr, it returns the index where x is located in
+    arr, otherwise it returns -1.
+
+    Parameters
+    ----------
+    arr : [list] Sorted list of integers where to search for x.
+    x : [int] Number that we want to search on arr.
+
+    Returns
+    -------
+    [int] If x is in arr, then returns its position, otherwise, it
+          returns.
+    """
     low = 0
     high = len(arr) - 1
     while low <= high:

@@ -20,7 +20,9 @@ class Timer:
 
 
     def stop(self):
-        """Stop the timer, and report the elapsed time"""
+        """Method used for stoping the timer and returning the elapsed time
+        since .start() was called.
+        """
         if self._start_time is None:
             raise TimerError(f"Timer is not running. Use .start() to start it")
 

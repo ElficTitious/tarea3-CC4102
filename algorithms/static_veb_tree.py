@@ -35,6 +35,9 @@ class StaticVEBTree:
         return self.root.is_member(x)
 
     def __data_to_bit_map(self, data):
+        """Method used to convert the data into a bit map.
+        Used to initialize the root (StaticVEBNode) whose constructor needs a bit map.
+        """
         bit_map = np.zeros(self.u)
         ptr_data = 0
         ptr_bit_map = 0
