@@ -6,16 +6,16 @@ class StaticVEBNode:
     """Class that represents a node of a static version of the structure vEB tree.
     """
 
-    def __init__(self, bin_map, u):
+    def __init__(self, bit_map, u):
         """Recursively initializes a StaticVEBNode.  
     
         Parameters
         ----------
-        bin_map : [numpy.ndarray] Binary map of the information to be
+        bit_map : [numpy.ndarray] Bit map of the information to be
                   stored in the node.
         u : [int] Universe size for the node.
         """
-        self.bin_map = bin_map
+        self.bit_map = bit_map
         self.u = u
         if not self.__is_empty():
             self.__init_max()
@@ -28,17 +28,17 @@ class StaticVEBNode:
     
     def __is_empty(self):
         for i in range(self.u):
-            if self.bin_map[i] == 1:
+            if self.bit_map[i] == 1:
                 return False
         return True
 
     def __init_min(self):
-        self.min = np.argmax(self.bin_map)
-        self.bin_map[self.min] = 0
+        self.min = np.argmax(self.bit_map)
+        self.bit_map[self.min] = 0
 
     def __init_max(self):
-        reverse_bin_map = self.bin_map[::-1]
-        self.max = len(reverse_bin_map) - np.argmax(reverse_bin_map) - 1
+        reverse_bit_map = self.bit_map[::-1]
+        self.max = len(reverse_bit_map) - np.argmax(reverse_bit_map) - 1
 
 
     def __high(self, x):
@@ -71,18 +71,18 @@ class StaticVEBNode:
         result = x % lower_sqrt(self.u)
         return result
 
-    def __partition_bin_maps(self):
-        partitioned_bin_maps = np.zeros((upper_sqrt(self.u), lower_sqrt(self.u)))
+    def __partition_bit_maps(self):
+        partitioned_bit_maps = np.zeros((upper_sqrt(self.u), lower_sqrt(self.u)))
         i = 0
-        ptr_bin_maps = 0
+        ptr_bit_maps = 0
         while i < self.u:
-            while self.__high(i) == ptr_bin_maps:
-                if self.bin_map[i] == 1:
-                    partitioned_bin_maps[ptr_bin_maps][self.__low(i)] = 1
+            while self.__high(i) == ptr_bit_maps:
+                if self.bit_map[i] == 1:
+                    partitioned_bit_maps[ptr_bit_maps][self.__low(i)] = 1
                 i += 1
-            ptr_bin_maps += 1
+            ptr_bit_maps += 1
 
-        return partitioned_bin_maps 
+        return partitioned_bit_maps 
 
     def __initialize_children(self):
         """Method used in the constructor of this class for initializing the children 
@@ -92,9 +92,9 @@ class StaticVEBNode:
             self.cluster = None
         else:
             self.cluster = []
-            partitioned_bin_maps = self.__partition_bin_maps()
+            partitioned_bit_maps = self.__partition_bit_maps()
             for i in range(upper_sqrt(self.u)):
-                temp_node = StaticVEBNode(partitioned_bin_maps[i], lower_sqrt(self.u))
+                temp_node = StaticVEBNode(partitioned_bit_maps[i], lower_sqrt(self.u))
                 self.cluster.append(temp_node)
 
         self.cluster = np.array(self.cluster)

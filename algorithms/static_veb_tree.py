@@ -16,9 +16,10 @@ class StaticVEBTree:
         ----------
         data : [list] Sequence of integers to be stored in the vEB node root.
         """
-        self.u = 2 * next_power_of_two(data[-1])
-        bin_map = self.__data_to_bin_map(data)
-        self.root = StaticVEBNode(bin_map, self.u)
+        self.u = next_power_of_two(data[-1]) if not is_power_of_two(data[-1]) \
+                 else 2 * next_power_of_two(data[-1])
+        bit_map = self.__data_to_bit_map(data)
+        self.root = StaticVEBNode(bit_map, self.u)
 
     def is_member(self, x):
         """Method that provides a wrapper to the StaticVEBNode.is_member() method.
@@ -33,14 +34,14 @@ class StaticVEBTree:
         """ 
         return self.root.is_member(x)
 
-    def __data_to_bin_map(self, data):
-        bin_map = np.zeros(self.u)
+    def __data_to_bit_map(self, data):
+        bit_map = np.zeros(self.u)
         ptr_data = 0
-        ptr_bin_map = 0
+        ptr_bit_map = 0
         for num in data:
-            bin_map[num] = 1
+            bit_map[num] = 1
 
-        return bin_map
+        return bit_map
 
 if __name__ == "__main__":
     

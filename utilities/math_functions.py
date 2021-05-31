@@ -4,6 +4,9 @@ def next_power_of_two(x):
     result = 1 << ceil(log2(x))
     return result
 
+def is_power_of_two(x):
+    return log2(x).is_integer()
+
 def prev_power_of_ten(x):
     result = 10 ** floor(log10(x))
     return result
@@ -20,3 +23,5 @@ def upper_sqrt(x):
 
 if __name__ == "__main__":
      print(prev_power_of_ten(3))
+     print(is_power_of_two(8))
+     print(is_power_of_two(21))
